@@ -1,3 +1,5 @@
 venv/
 video_mat/
 __pycache__/
+config.ini
+*.log
