@@ -1,52 +1,30 @@
 import flet as ft
 import configparser
-
-def settings_page(page: ft.Page):
-    with open('config.ini', 'r') as config_file:
-        config = configparser.ConfigParser()
-        config.read_file(config_file)
-    theme = config.get('settings', 'theme', fallback='light')
-
-    def on_change(e):
-        theme = e.control.value
-        with open('config.ini', 'r+') as config_file:
-            config = configparser.ConfigParser()
-            config.read_file(config_file)
-            config.set('settings', 'theme', theme)
-            config.write(config_file)
-            
-    stack = ft.Stack(
-            padding=ft.SpacingSize.LARGE,
-            horizontal_align="center",
-            vertical_content_alignment="center",
-            children=[
-                ft.Text(
-                    text="Settings",
-                    font="bold 32px sans-serif",
-                    color=ft.ForeColors.ATTENTION,
-                    opacity=1,
-                ),
-                ft.Stack(
-                    padding=ft.SpacingSize.LARGE,
-                    horizontal_align="center",
-                    vertical_content_alignment="center",
-                    children=[
-                        ft.Text(
-                            text="Theme:",
-                            font="bold 16px sans-serif",
-                            color=ft.ForeColors.ATTENTION,
-                            opacity=1,
-                        ),
-                        ft.Checkbox(
-                            value=theme == 'dark',
-                            on_change=on_change,
-                        ),
-                    ],
-                ),
-            ],
-        ),
+import os
+def apply_theme(page: ft.Page, config: configparser.ConfigParser):
+    page.theme_mode = config['DEFAULT']['theme']
+    page.update()
     
-    page.add(
-        stack
-    )
+def check_cfg(config: configparser.ConfigParser):
+    if not os.path.exists('config.ini'):
+        with open('config.ini', 'w') as configfile:
+            config['DEFAULT'] = {'theme': 'light', 'language': 'en'}
+            config.write(configfile)     
+            
+def settings_page(page: ft.Page):
+    config = configparser.ConfigParser()
+    check_cfg(config)   
+    def on_theme_change(e):
+        config['DEFAULT']['theme'] = 'dark' if e.control.value else 'light'
+        apply_theme(page, config)
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+            
+    config.read('config.ini')
+    
+    page.add(ft.Checkbox(
+        on_change=on_theme_change,
+        label='Dark theme',
+        value = (config['DEFAULT']['theme'] == 'dark')
+    ))
     

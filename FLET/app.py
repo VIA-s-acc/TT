@@ -1,14 +1,15 @@
 import flet as ft
 from pages.main import main_page
+from pages.settings import settings_page, apply_theme, check_cfg
+import configparser
 
 def main(page: ft.Page):
-    """
-    This function is the main entry point of the application. It initializes the page and sets up the navigation bar.
-    It also defines the behavior of the navigation bar when the user changes the selected index.
-    """
-
     # Set the page to adaptive mode
     page.adaptive = True
+    config = configparser.ConfigParser()
+    check_cfg(config)
+    config.read('config.ini')
+    apply_theme(page, config)
 
     # Define the behavior of the navigation bar when the user changes the selected index
     def on_navbar_change(e):
@@ -22,7 +23,7 @@ def main(page: ft.Page):
         # Check if the selected index is 1 (Settings)
         elif e.control.selected_index == 1:
             # Do nothing (placeholder for future implementation)
-            pass
+            settings_page(page)
 
         # Update the page
         page.update()
@@ -31,8 +32,8 @@ def main(page: ft.Page):
     page.navigation_bar = ft.NavigationBar(
         # Define the destinations (icons and labels) of the navigation bar
         destinations=[
-            ft.NavigationBarDestination(icon=ft.HOME, label='Home'),
-            ft.NavigationBarDestination(icon=ft.SETTINGS, label='Settings'),
+            ft.NavigationBarDestination(icon=ft.icons.HOME, label='Home'),
+            ft.NavigationBarDestination(icon=ft.icons.SETTINGS, label='Settings'),
         ],
         # Set the border of the navigation bar
         border=ft.Border(
@@ -47,7 +48,7 @@ def main(page: ft.Page):
         # Set the behavior of the navigation bar when the user changes the selected index
         on_change=on_navbar_change
     )
-
+    page.update()
     # Call the main_page function with the page object as an argument
     main_page(page)
 
